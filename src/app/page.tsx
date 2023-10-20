@@ -1,95 +1,47 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+
+import {Noto_Serif} from "next/font/google";
+import {Button, DatePicker, Select, Space} from "antd";
+import {SearchOutlined} from "@ant-design/icons";
+
+const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export default function Home() {
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 16,
+        paddingBottom: 80,
+      }}>
+        <h1 style={{ color: '#1e1e8f' }} className={notoSerif.className}>Find Articles By</h1>
+        <Space.Compact style={{ border: '16px solid #f4f4f4', borderRadius: 24}} size="large">
+          <Select
+              mode="multiple"
+              allowClear
+              size='large'
+              maxTagCount='responsive'
+              style={{ width: 200 }}
+              placeholder="Select SE practice"
+              options={[
+                {label: 122, value: 12},
+                {label: 431, value: 13},
+                {label: 143432, value: 14},
+                {label: 1523, value: 15},
+                {label: 5325231, value: 16},
+              ]}
+          />
+          <DatePicker.RangePicker picker="year" />
+          <Button style={{ backgroundColor: '#2525af' }} type="primary" icon={<SearchOutlined />}>
+            Search
+          </Button>
+        </Space.Compact>
+
+
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
   )
 }

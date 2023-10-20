@@ -1,0 +1,19 @@
+.normal-nav-item {
+    transition-duration: 300ms;
+    text-decoration: none;
+    color: #222;
+
+    &:hover {
+        font-weight: bold;
+    }
+}
+
+.highlight-nav-item {
+    transition-duration: 300ms;
+    background-color: #1e1e8f;
+
+    &:hover {
+        font-weight: bold;
+        background-color: #181865;
+    }
+}
