@@ -61,7 +61,7 @@ export default function SubmitNew() {
       throw new Error('Failed to fetch data')
     }
 
-    const response = (await res.json()).code;
+    const response = await res.json();
 
     setPending(false);
 
