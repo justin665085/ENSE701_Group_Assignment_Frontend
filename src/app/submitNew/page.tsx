@@ -9,7 +9,9 @@ const notoSerif = Noto_Serif({subsets: ['latin']})
 const FORM_FIELDS = [
   {label: 'Title', name: 'title'},
   {
-    label: 'Authors', name: 'authors', jsx: (
+    label: 'Authors',
+    name: 'authors',
+    jsx: (
         <Select
             open={false}
             suffixIcon={<></>}
