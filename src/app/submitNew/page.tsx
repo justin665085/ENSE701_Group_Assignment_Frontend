@@ -50,7 +50,10 @@ export default function SubmitNew() {
     console.log(params);
 
     setPending(true);
-    const res = await fetch('/api/submitNew')
+    const res = await fetch('/api/submitNew', {
+      method: 'post',
+      body: JSON.stringify(params),
+    })
 
     if (!res.ok) {
       setPending(false);
