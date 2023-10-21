@@ -34,10 +34,10 @@ const FORM_FIELDS = [
   {label: 'Journal Name', name: 'jName'},
   {label: 'SE Practice', name: 'sePractice'},
   {label: 'Claim', name: 'claim', jsx: <Input.TextArea placeholder='Input Cliam' rows={4}/>},
-  {label: 'Result of evidence', name: 'roe'},
+  {label: 'Result of evidence', name: 'ROE'},
   {
     label: 'Type of research',
-    name: 'tor',
+    name: 'TOR',
     jsx: (
         <Select
             open={false}
@@ -52,7 +52,7 @@ const FORM_FIELDS = [
   },
   {
     label: 'Type of participant',
-    name: 'top',
+    name: 'TOP',
     jsx: (
         <Select
             open={false}

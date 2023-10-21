@@ -3,10 +3,13 @@
 import {Noto_Serif} from "next/font/google";
 import {Button, DatePicker, Select, Space} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
+import { useRouter } from 'next/navigation'
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export default function Home() {
+  const router = useRouter();
+
   return (
       <div style={{
         width: '100%',
@@ -35,13 +38,16 @@ export default function Home() {
                 {label: 5325231, value: 16},
               ]}
           />
-          <DatePicker.RangePicker picker="year" />
-          <Button style={{ backgroundColor: '#2525af' }} type="primary" icon={<SearchOutlined />}>
+          <DatePicker picker="year" />
+          <Button
+              style={{ backgroundColor: '#2525af' }}
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => router.push('/searchResult')}
+          >
             Search
           </Button>
         </Space.Compact>
-
-
       </div>
   )
 }

@@ -2,8 +2,6 @@
 
 import {Noto_Serif} from "next/font/google";
 import {Button, Tag, Table, Tabs, TabsProps, Popconfirm} from "antd";
-import {Simulate} from "react-dom/test-utils";
-import cancel = Simulate.cancel;
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
