@@ -1,7 +1,7 @@
 'use client'
 
 import {Noto_Serif} from "next/font/google";
-import {Input, Button, Form, DatePicker, Select, InputNumber, message} from "antd";
+import {Input, Button, Form, DatePicker, Select, message} from "antd";
 import dayjs from "dayjs";
 import {useState} from "react";
 

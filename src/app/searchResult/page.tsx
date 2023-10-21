@@ -4,7 +4,7 @@ import {Noto_Serif} from "next/font/google";
 import {Table, Space, DatePicker, Button, Input, message} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
 import {useRouter, useSearchParams} from 'next/navigation'
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import dayjs from "dayjs";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
@@ -58,8 +58,8 @@ export default function Moderation() {
 }
 
 function ResultTable({practice, year}:{practice: string, year: string}) {
+  const initialed = useRef(false);
   const [pending, setPending] = useState(false);
-
   const [searchResult, setSearchResult] = useState([]);
 
   async function search() {
@@ -83,9 +83,10 @@ function ResultTable({practice, year}:{practice: string, year: string}) {
     }
   }
 
-  useEffect(() => {
+  if (!initialed.current) {
     search();
-  }, [])
+    initialed.current = true;
+  }
 
   const columns = [
     {title: 'Title', dataIndex: 'title', key: 'title',},

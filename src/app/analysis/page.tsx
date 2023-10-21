@@ -159,7 +159,7 @@ export default function Moderation() {
                   title: '',
                   dataIndex: 'action',
                   key: 'action',
-                  render: (text, record, index) => (
+                  render: (text, record) => (
                       <Button type="primary" onClick={() => {
                         setIsModalOpen(true);
                         setModalInitialValue(record);
