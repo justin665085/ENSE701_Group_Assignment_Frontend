@@ -9,9 +9,9 @@ export async function POST(request: Request) {
       }
   )
 
-  let code = 0;
+  let code = 1;
   if (res.ok) {
-    code = 1;
+    code = 0;
   }
 
   return Response.json({code})
