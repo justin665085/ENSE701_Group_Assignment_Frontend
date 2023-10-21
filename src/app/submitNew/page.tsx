@@ -20,22 +20,7 @@ export type NewArticle = {
 
 const FORM_FIELDS = [
   {label: 'Title', name: 'title'},
-  {
-    label: 'Authors',
-    name: 'authors',
-    jsx: (
-        <Select
-            open={false}
-            suffixIcon={<></>}
-            size='large'
-            mode="tags"
-            showSearch={false}
-            style={{width: 640, cursor: 'text'}}
-            tokenSeparators={[',']}
-            placeholder='Input Authors (Use comma or Enter for name separation)'
-        />
-    )
-  },
+  {label: 'Authors', name: 'authors',},
   {label: 'Journal Name', name: 'jName'},
   {label: 'Year of Public', name: 'yop', jsx: <DatePicker size='large' picker="year"/>},
   {label: 'Volume', name: 'volume'},
