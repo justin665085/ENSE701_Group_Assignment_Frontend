@@ -1,13 +1,17 @@
 'use client'
 
 import {Noto_Serif} from "next/font/google";
-import {Button, DatePicker, Select, Space} from "antd";
+import {Button, DatePicker, Input, Select, Space} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
 import { useRouter } from 'next/navigation'
+import {useRef, useState} from "react";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export default function Home() {
+  const practice = useRef('');
+  const year = useRef('');
+
   const router = useRouter();
 
   return (
@@ -23,27 +27,35 @@ export default function Home() {
       }}>
         <h1 style={{ color: '#1e1e8f' }} className={notoSerif.className}>Find Articles By</h1>
         <Space.Compact style={{ border: '16px solid #f4f4f4', borderRadius: 24}} size="large">
-          <Select
-              mode="multiple"
-              allowClear
-              size='large'
-              maxTagCount='responsive'
+          {/*<Select*/}
+          {/*    mode="multiple"*/}
+          {/*    allowClear*/}
+          {/*    size='large'*/}
+          {/*    maxTagCount='responsive'*/}
+          {/*    style={{ width: 200 }}*/}
+          {/*    placeholder="Select SE practice"*/}
+          {/*    options={[*/}
+          {/*      {label: 122, value: 12},*/}
+          {/*      {label: 431, value: 13},*/}
+          {/*      {label: 143432, value: 14},*/}
+          {/*      {label: 1523, value: 15},*/}
+          {/*      {label: 5325231, value: 16},*/}
+          {/*    ]}*/}
+          {/*/>*/}
+          <Input
+              onChange={(e) => practice.current = e.target.value}
               style={{ width: 200 }}
-              placeholder="Select SE practice"
-              options={[
-                {label: 122, value: 12},
-                {label: 431, value: 13},
-                {label: 143432, value: 14},
-                {label: 1523, value: 15},
-                {label: 5325231, value: 16},
-              ]}
+              placeholder='Input SE Practice'
           />
-          <DatePicker picker="year" />
+          <DatePicker
+              onChange={(dayjs) => year.current = ''+dayjs?.year()}
+              picker="year"
+          />
           <Button
               style={{ backgroundColor: '#2525af' }}
               type="primary"
               icon={<SearchOutlined />}
-              onClick={() => router.push('/searchResult')}
+              onClick={() => router.push(`/searchResult?practice=${practice.current}&year=${year.current}`)}
           >
             Search
           </Button>

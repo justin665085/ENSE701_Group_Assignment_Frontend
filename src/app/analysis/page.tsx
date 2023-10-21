@@ -9,10 +9,10 @@ import {
   Modal,
   Form,
   Input,
-  Select,
+  Select, message, FormInstance,
 } from "antd";
-import {Simulate} from "react-dom/test-utils";
-import {useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import {NewArticle} from "@/app/submitNew/page";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -68,37 +68,72 @@ const FORM_FIELDS = [
   {label: 'DOI', name: 'doi'},
 ]
 
+export type AnalyseRecord = {
+  id: string,
+  authors?: string[];
+  jName?: string;
+  title?: string;
+  yop?: string;
+  sePractice?: string;
+  claim?: string;
+  ROE?: string;
+  TOR?: string[];
+  TOP?: string[];
+  DOI?: string[];
+}
+
 export default function Moderation() {
-  const dataSource = {
-    authors: ['Jack'],
-    doi: '10.23/1s0d',
-    jName: 'Hale',
-    number: '1',
-    pages: '28-32',
-    title: 'Have a Good Day',
-    volume: '2',
-    yop: '2021',
-  };
-
+  const [waitingList, setWaitingList] = useState<({ id: string; } & NewArticle)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialValue, setModalInitialValue] = useState<AnalyseRecord>({id: '-1'});
+  const [modalSubmitPending, setModalSubmitPending] = useState(false);
 
-  const [modalInitialValue, setModalInitialValue] = useState<
-      {
-        doi: string;
-        authors?: string[];
-        jName?: string;
-        number?: string;
-        pages?: string;
-        title?: string;
-        volume?: string;
-        yop?: string;
-        sePractice?: string;
-        claim?: string;
-        roe?: string;
-        tor?: string[];
-        top?: string[];
-      }
-  >({doi: ''});
+  async function freshData() {
+    const res = await fetch('/api/fetchAnalysis')
+
+    if (!res.ok) {
+      setModalSubmitPending(false);
+      message.error('Failed to fetch data');
+      throw new Error('Failed to fetch data')
+    }
+
+    let response = await res.json();
+
+    setWaitingList(response.data);
+  }
+
+  useEffect(() => {
+    freshData();
+  }, []);
+
+  const modalForm = useRef<FormInstance>(null);
+
+  async function handleModalSubmit() {
+    if(modalForm.current === null) return;
+    const formValue: AnalyseRecord = modalForm.current.getFieldsValue()
+    console.log(formValue)
+    setModalSubmitPending(true);
+    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(formValue)})
+
+    if (!res.ok) {
+      setModalSubmitPending(false);
+      message.error('Failed to fetch data');
+      throw new Error('Failed to fetch data')
+    }
+
+    setModalSubmitPending(false);
+
+    const response = await res.json();
+
+    if (response.code === 0) {
+      console.log(response);
+      setIsModalOpen(false);
+      freshData();
+      message.success('Success');
+    } else {
+      message.error(response.msg ?? 'error');
+    }
+  }
 
   const columns = [
     {title: 'Title', dataIndex: 'title', key: 'title',},
@@ -117,7 +152,7 @@ export default function Moderation() {
       label: 'Waiting Queue',
       children:
           <Table
-              dataSource={new Array(15).fill(0).map((item, index) => ({...dataSource, doi: ''+index}))}
+              dataSource={waitingList}
               columns={[
                 ...columns,
                 {
@@ -147,10 +182,12 @@ export default function Moderation() {
       }}>
         <h2 className={notoSerif.className}>Analysis</h2>
         <Tabs defaultActiveKey="1" items={items}/>
-        <Modal title="Article Detail" okText='Submit' open={isModalOpen} onOk={() => setIsModalOpen(false)}
+        <Modal title="Article Detail" okText='Submit' open={isModalOpen} onOk={handleModalSubmit}
+               confirmLoading={modalSubmitPending}
                onCancel={() => setIsModalOpen(false)}>
           <Form
-              key={modalInitialValue.doi}
+              ref={modalForm}
+              key={modalInitialValue.id}
               initialValues={modalInitialValue}
               layout="vertical"
           >

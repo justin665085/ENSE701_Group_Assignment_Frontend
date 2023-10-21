@@ -1,10 +1,22 @@
 'use client'
 
 import {Noto_Serif} from "next/font/google";
-import {Input, Button, Form, DatePicker, Select, InputNumber} from "antd";
+import {Input, Button, Form, DatePicker, Select, InputNumber, message} from "antd";
 import dayjs from "dayjs";
+import {useState} from "react";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
+
+export type NewArticle = {
+  doi?: string;
+  authors?: string[];
+  jName?: string;
+  number?: string;
+  pages?: string;
+  title?: string;
+  volume?: string;
+  yop?: string;
+}
 
 const FORM_FIELDS = [
   {label: 'Title', name: 'title'},
@@ -26,13 +38,17 @@ const FORM_FIELDS = [
   },
   {label: 'Journal Name', name: 'jName'},
   {label: 'Year of Public', name: 'yop', jsx: <DatePicker size='large' picker="year"/>},
-  {label: 'Volume', name: 'volume', jsx: <InputNumber size='large' placeholder='Input Volume'/>},
-  {label: 'Number', name: 'number', jsx: <InputNumber size='large' placeholder='Input Number'/>},
+  {label: 'Volume', name: 'volume'},
+  {label: 'Number', name: 'number'},
   {label: 'Pages', name: 'pages'},
   {label: 'DOI', name: 'doi'},
 ]
 export default function SubmitNew() {
-  function handleSubmit(formValue: {
+  const [pending, setPending] = useState(false);
+
+  const [formKey, setFormKey] = useState(0);
+
+  async function handleSubmit(formValue: {
     authors: string
     doi: string
     jName: string
@@ -44,10 +60,29 @@ export default function SubmitNew() {
   }) {
     let params = {
       ...formValue,
-      yop: formValue.yop.year()
+      yop: formValue.yop?.year()
+    }
+    console.log(params);
+
+    setPending(true);
+    const res = await fetch('/api/submitNew')
+
+    if (!res.ok) {
+      setPending(false);
+      message.error('Failed to fetch data');
+      throw new Error('Failed to fetch data')
     }
 
-    console.log(params);
+    const response = (await res.json()).code;
+
+    setPending(false);
+
+    if (response.code === 0) {
+      message.success('success');
+      setFormKey(k => k+1);
+    } else {
+      message.error(response.msg ?? 'error');
+    }
   }
 
   return (
@@ -62,6 +97,7 @@ export default function SubmitNew() {
         }}>
           <h2 className={notoSerif.className}>Submit New Article</h2>
           <Form
+              key={formKey}
               onFinish={handleSubmit}
               labelCol={{span: 4}}
               wrapperCol={{span: 12}}
@@ -73,7 +109,7 @@ export default function SubmitNew() {
                 </Form.Item>
             ))}
             <Form.Item style={{marginTop: 40}}>
-              <Button size='large' type="primary" htmlType="submit">
+              <Button loading={pending} size='large' type="primary" htmlType="submit">
                 Submit
               </Button>
             </Form.Item>

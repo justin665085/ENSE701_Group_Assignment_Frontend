@@ -1,28 +1,91 @@
 'use client'
 
 import {Noto_Serif} from "next/font/google";
-import {Table, Rate, Space, Select, DatePicker, Button} from "antd";
+import {Table, Space, DatePicker, Button, Input, message} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
-import {useParams, useRouter} from 'next/navigation'
+import {useRouter, useSearchParams} from 'next/navigation'
+import {useEffect, useState} from "react";
+import dayjs from "dayjs";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export default function Moderation() {
   const router = useRouter();
-  const params = useParams();
+  const params = useSearchParams()
 
-  const dataSource = {
-    "title": "LLM",
-    "authors": "string",
-    "yop": "2023",
-    "jName": "ICSE",
-    "SEpractice": "string",
-    "claim": "string",
-    "ROE": "string",
-    "TOR": "string",
-    "TOP": "string",
-    "id": "653231df9858341079519bf6"
-  };
+  const paramPractice = params.get('practice') ?? '';
+  const paramYear = params.get('year') ?? '';
+
+  const [practice, setPractice] = useState(paramPractice);
+  const [year, setYear] = useState(paramYear);
+
+  return (
+      <div style={{
+        marginTop: 32,
+        marginBottom: 80,
+        gap: 16,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start'
+      }}>
+        <h2 className={notoSerif.className}>Search Result</h2>
+        <Space.Compact>
+          <Input
+              value={practice ?? ''}
+              onChange={(e) => setPractice(e.target.value)}
+              style={{ width: 200 }}
+              placeholder='Input SE Practice'
+          />
+          <DatePicker
+              onChange={(dayjs) => setYear(''+dayjs?.year())}
+              picker="year"
+              {...(year === null || year.length === 0 ? {} : {value: dayjs().year(+year)})}
+          />
+          <Button
+              style={{backgroundColor: '#2525af'}}
+              type="primary"
+              icon={<SearchOutlined/>}
+              onClick={() => {
+                router.push(`/searchResult?practice=${practice}&year=${year}`)
+              }}
+          >
+            Search
+          </Button>
+        </Space.Compact>
+        <ResultTable key={''+paramYear+paramPractice} practice={paramPractice} year={paramYear} />
+      </div>
+  )
+}
+
+function ResultTable({practice, year}:{practice: string, year: string}) {
+  const [pending, setPending] = useState(false);
+
+  const [searchResult, setSearchResult] = useState([]);
+
+  async function search() {
+    setPending(true);
+    const res = await fetch(`/api/search?practice=${practice}&year=${year}`,)
+
+    if (!res.ok) {
+      setPending(false);
+      message.error('Failed to fetch data');
+      throw new Error('Failed to fetch data')
+    }
+
+    setPending(false);
+
+    const response = await res.json();
+
+    if (response.code === 0) {
+      setSearchResult(response.data);
+    } else {
+      message.error(response.msg ?? 'error');
+    }
+  }
+
+  useEffect(() => {
+    search();
+  }, [])
 
   const columns = [
     {title: 'Title', dataIndex: 'title', key: 'title',},
@@ -36,54 +99,19 @@ export default function Moderation() {
     {title: 'Type of participant', dataIndex: 'TOP', key: 'TOP',},
   ];
 
-
   return (
-      <div style={{
-        marginTop: 32,
-        marginBottom: 80,
-        gap: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start'
-      }}>
-        <h2 className={notoSerif.className}>Search Result</h2>
-        <Space.Compact>
-          <Select
-              mode="multiple"
-              allowClear
-              maxTagCount='responsive'
-              style={{width: 200}}
-              placeholder="Select SE practice"
-              options={[
-                {label: 122, value: 12},
-                {label: 431, value: 13},
-                {label: 143432, value: 14},
-                {label: 1523, value: 15},
-                {label: 5325231, value: 16},
-              ]}
-          />
-          <DatePicker picker="year"/>
-          <Button
-              style={{backgroundColor: '#2525af'}}
-              type="primary"
-              icon={<SearchOutlined/>}
-              onClick={() => router.push('/searchResult')}
-          >
-            Search
-          </Button>
-        </Space.Compact>
-        <Table
-            dataSource={new Array(15).fill(0).map(() => dataSource)}
-            columns={[
-              ...columns,
-              // {
-              //   title: '', dataIndex: 'action', key: 'action',
-              //   render: () => (
-              //       <Rate/>
-              //   )
-              // },
-            ]}
-        />,
-      </div>
+      <Table
+          loading={pending}
+          dataSource={searchResult}
+          columns={[
+            ...columns,
+            // {
+            //   title: '', dataIndex: 'action', key: 'action',
+            //   render: () => (
+            //       <Rate/>
+            //   )
+            // },
+          ]}
+      />
   )
 }

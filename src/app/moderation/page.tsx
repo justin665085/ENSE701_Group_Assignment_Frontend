@@ -1,21 +1,31 @@
 'use client'
 
 import {Noto_Serif} from "next/font/google";
-import {Button, Tag, Table, Tabs, TabsProps, Popconfirm} from "antd";
+import {Button, message, Table, Tabs, TabsProps, Popconfirm} from "antd";
+import {useEffect, useState} from "react";
+import {NewArticle} from "@/app/submitNew/page";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export default function Moderation() {
-  const dataSource = {
-    authors: 'Jack',
-    doi: '10.23/1s0d',
-    jName: 'Hale',
-    number: '1',
-    pages: '28-32',
-    title: 'Have a Good Day',
-    volume: '2',
-    yop: '2021',
-  };
+  const [waitingList, setWaitingList] = useState<({id: string;}&NewArticle)[]>([]);
+
+  async function freshData() {
+    const res = await fetch('/api/fetchModeration')
+
+    if (!res.ok) {
+      message.error('Failed to fetch data');
+      throw new Error('Failed to fetch data')
+    }
+
+    let response = await res.json();
+
+    setWaitingList(response.data);
+  }
+
+  useEffect(() => {
+    freshData();
+  }, []);
 
   const columns = [
     {title: 'Title', dataIndex: 'title', key: 'title',},
@@ -34,48 +44,34 @@ export default function Moderation() {
       label: 'Waiting Queue',
       children:
           <Table
-              dataSource={new Array(15).fill(0).map(() => dataSource)}
+              dataSource={waitingList}
               columns={[
                 ...columns,
                 {
-                  title: '', dataIndex: 'action', key: 'action', render: () => (
-                      <div style={{gap: 8, display: 'flex'}}>
-                        <Popconfirm
-                            title="Accept this submission"
-                            description="Are you sure to accept this submission?"
-                            okText="Yes"
-                            cancelText="No"
-                        >
-                          <Button type="primary" ghost>Accept</Button>
-                        </Popconfirm>
-                        <Popconfirm
-                            title="Reject this submission"
-                            description="Are you sure to reject this submission?"
-                            okText="Yes"
-                            cancelText="No"
-                        >
-                          <Button danger>Reject</Button>
-                        </Popconfirm>
-                      </div>
+                  title: '',
+                  dataIndex: 'action',
+                  key: 'action',
+                  render: (text, record) => (
+                      <RowAction id={record.id} onSuccess={freshData} />
                   )
                 },
               ]}
           />,
     },
-    {
-      key: '2',
-      label: 'History',
-      children:
-          <Table
-              dataSource={new Array(1542).fill(0).map(() => dataSource)}
-              columns={[
-                ...columns,
-                {
-                  title: 'State', dataIndex: 'state', key: 'state', render: () => <Tag color="error">Rejected</Tag>
-                },
-              ]}
-          />,
-    },
+    // {
+    //   key: '2',
+    //   label: 'History',
+    //   children:
+    //       <Table
+    //           dataSource={waitingList}
+    //           columns={[
+    //             ...columns,
+    //             {
+    //               title: 'State', dataIndex: 'state', key: 'state', render: () => <Tag color="error">Rejected</Tag>
+    //             },
+    //           ]}
+    //       />,
+    // },
   ];
 
   return (
@@ -91,4 +87,55 @@ export default function Moderation() {
         <Tabs defaultActiveKey="1" items={items}/>
       </div>
   )
+}
+
+function RowAction({id, onSuccess}:{id:string, onSuccess: Function}) {
+  const [pending, setPending] = useState(false);
+
+  async function moderate(opinion: 1 | 2) {
+    console.log(opinion);
+    setPending(true);
+    const res = await fetch(`/api/moderate?id=${id}&opinion=${opinion}`,)
+
+    if (!res.ok) {
+      setPending(false);
+      message.error('Failed to fetch data');
+      throw new Error('Failed to fetch data')
+    }
+
+    setPending(false);
+
+    const response = await res.json();
+
+    if (response.code === 0) {
+      console.log(response);
+      onSuccess();
+      message.success('Success');
+    } else {
+      message.error(response.msg ?? 'error');
+    }
+  }
+
+  return (
+      <div style={{gap: 8, display: 'flex'}}>
+        <Popconfirm
+            title="Accept this submission"
+            description="Are you sure to accept this submission?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => moderate(1)}
+        >
+          <Button loading={pending} type="primary" ghost>Accept</Button>
+        </Popconfirm>
+        <Popconfirm
+            title="Reject this submission"
+            description="Are you sure to reject this submission?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => moderate(2)}
+        >
+          <Button loading={pending} danger>Reject</Button>
+        </Popconfirm>
+      </div>
+  );
 }
