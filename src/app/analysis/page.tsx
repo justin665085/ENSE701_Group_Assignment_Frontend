@@ -14,6 +14,7 @@ import {
 import {useEffect, useRef, useState} from "react";
 import {NewArticle} from "@/app/submitNew/page";
 import dayjs, {Dayjs} from "dayjs";
+import {noCacheHeader} from "@/common/const";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -95,7 +96,10 @@ export default function Moderation() {
 
   async function freshData() {
     setFetching(true);
-    const res = await fetch('/api/fetchAnalysis')
+    const res = await fetch('/api/fetchAnalysis',
+        {
+          headers: noCacheHeader
+        })
     setFetching(false);
 
     if (!res.ok) {
@@ -126,7 +130,7 @@ export default function Moderation() {
 
     console.log(param)
     setModalSubmitPending(true);
-    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(param)})
+    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(param), headers: noCacheHeader})
 
     if (!res.ok) {
       setModalSubmitPending(false);

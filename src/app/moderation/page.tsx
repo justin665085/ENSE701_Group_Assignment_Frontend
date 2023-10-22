@@ -4,6 +4,7 @@ import {Noto_Serif} from "next/font/google";
 import {Button, message, Table, Tabs, TabsProps, Popconfirm} from "antd";
 import {useEffect, useState} from "react";
 import {NewArticle} from "@/app/submitNew/page";
+import {noCacheHeader} from "@/common/const";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -14,7 +15,10 @@ export default function Moderation() {
 
   async function freshData() {
     setFetching(true);
-    const res = await fetch('/api/fetchModeration')
+    const res = await fetch('/api/fetchModeration',
+        {
+          headers: noCacheHeader
+        })
     setFetching(false);
 
     if (!res.ok) {
@@ -105,7 +109,8 @@ function RowAction({record, onSuccess}:{record:{id:string}&NewArticle, onSuccess
       body: JSON.stringify({
         ...record,
         opinion,
-      })
+      }),
+      headers: noCacheHeader
     })
 
     if (!res.ok) {

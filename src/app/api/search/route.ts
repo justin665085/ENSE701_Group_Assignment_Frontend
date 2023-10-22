@@ -1,12 +1,15 @@
 import {NextRequest} from "next/server";
-import {BASE_URL} from "@/common/const";
+import {BASE_URL, noCacheHeader} from "@/common/const";
 
 export async function GET(
     request: NextRequest
 ) {
   const searchParams = request.nextUrl.searchParams
   const res = await fetch(
-      `${BASE_URL}/api/searchPaper?practice=${searchParams.get('practice')}&year=${searchParams.get('year')}`
+      `${BASE_URL}/api/searchPaper?practice=${searchParams.get('practice')}&year=${searchParams.get('year')}`,
+      {
+        headers: noCacheHeader
+      }
   )
   const data = await res.json()
 

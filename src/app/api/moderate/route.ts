@@ -1,8 +1,8 @@
-import {BASE_URL} from "@/common/const";
+import {BASE_URL, noCacheHeader} from "@/common/const";
 
 export async function POST(request: Request) {
   const body = await request.json()
-  let headers = new Headers();
+  let headers = new Headers(noCacheHeader);
   headers.append("Content-Type", "application/json");
 
   const res = await fetch(

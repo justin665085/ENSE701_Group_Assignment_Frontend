@@ -6,6 +6,7 @@ import {SearchOutlined} from "@ant-design/icons";
 import {useRouter, useSearchParams} from 'next/navigation'
 import {useEffect, useRef, useState} from "react";
 import dayjs from "dayjs";
+import {noCacheHeader} from "@/common/const";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -64,7 +65,10 @@ function ResultTable({practice, year}:{practice: string, year: string}) {
 
   async function search() {
     setPending(true);
-    const res = await fetch(`/api/search?practice=${practice}&year=${year}`,)
+    const res = await fetch(`/api/search?practice=${practice}&year=${year}`,
+        {
+          headers: noCacheHeader
+        })
 
     if (!res.ok) {
       setPending(false);

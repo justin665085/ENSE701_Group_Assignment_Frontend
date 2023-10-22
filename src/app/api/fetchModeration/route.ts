@@ -1,7 +1,10 @@
-import {BASE_URL} from "@/common/const";
+import {BASE_URL, noCacheHeader} from "@/common/const";
 
 export async function GET() {
-  const res = await fetch(`${BASE_URL}/api/browseAllNewPaper`, )
+  let headers = new Headers(noCacheHeader);
+  headers.append("Pragma", "no-cache");
+
+  const res = await fetch(`${BASE_URL}/api/browseAllNewPaper`, {headers})
   const data = await res.json()
 
   let code = 1;

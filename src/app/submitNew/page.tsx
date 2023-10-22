@@ -4,6 +4,7 @@ import {Noto_Serif} from "next/font/google";
 import {Input, Button, Form, DatePicker, Select, message} from "antd";
 import dayjs from "dayjs";
 import {useState} from "react";
+import {noCacheHeader} from "@/common/const";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -53,6 +54,7 @@ export default function SubmitNew() {
     const res = await fetch('/api/submitNew', {
       method: 'post',
       body: JSON.stringify(params),
+      headers: noCacheHeader
     })
 
     if (!res.ok) {
