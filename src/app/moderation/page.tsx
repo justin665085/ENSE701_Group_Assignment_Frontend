@@ -4,7 +4,7 @@ import {Noto_Serif} from "next/font/google";
 import {Button, message, Table, Tabs, TabsProps, Popconfirm} from "antd";
 import {useEffect, useState} from "react";
 import {NewArticle} from "@/app/submitNew/page";
-import {noCacheHeader} from "@/common/const";
+import {BASE_URL, noCacheHeader} from "@/common/const";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -15,10 +15,10 @@ export default function Moderation() {
 
   async function freshData() {
     setFetching(true);
-    const res = await fetch('/api/fetchModeration',
-        {
-          headers: noCacheHeader
-        })
+    let headers = new Headers(noCacheHeader);
+    headers.append("Pragma", "no-cache");
+
+    const res = await fetch(`${BASE_URL}/api/browseAllNewPaper`, {headers})
     setFetching(false);
 
     if (!res.ok) {
@@ -26,9 +26,9 @@ export default function Moderation() {
       throw new Error('Failed to fetch data')
     }
 
-    let response = await res.json();
+    const data = await res.json()
 
-    setWaitingList(response.data);
+    setWaitingList(data);
   }
 
   useEffect(() => {
@@ -104,14 +104,21 @@ function RowAction({record, onSuccess}:{record:{id:string}&NewArticle, onSuccess
   async function moderate(opinion: 0 | 1) {
     console.log(opinion);
     setPending(true);
-    const res = await fetch(`/api/moderate`, {
-      method: 'post',
-      body: JSON.stringify({
-        ...record,
-        opinion,
-      }),
-      headers: noCacheHeader
-    })
+
+    let headers = new Headers(noCacheHeader);
+    headers.append("Content-Type", "application/json");
+
+    const res = await fetch(
+        `${BASE_URL}/api/reviewPaper`,
+        {
+          method: 'post',
+          body: JSON.stringify({
+            ...record,
+            opinion,
+          }),
+          headers: headers
+        }
+    )
 
     if (!res.ok) {
       setPending(false);
@@ -123,13 +130,9 @@ function RowAction({record, onSuccess}:{record:{id:string}&NewArticle, onSuccess
 
     const response = await res.json();
 
-    if (response.code === 0) {
-      console.log(response);
-      onSuccess();
-      message.success('Success');
-    } else {
-      message.error(response.msg ?? 'error');
-    }
+    console.log(response);
+    onSuccess();
+    message.success('Success');
   }
 
   return (

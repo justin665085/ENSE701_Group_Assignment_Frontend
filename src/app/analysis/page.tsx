@@ -14,7 +14,7 @@ import {
 import {useEffect, useRef, useState} from "react";
 import {NewArticle} from "@/app/submitNew/page";
 import dayjs, {Dayjs} from "dayjs";
-import {noCacheHeader} from "@/common/const";
+import {BASE_URL, noCacheHeader} from "@/common/const";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
@@ -96,10 +96,13 @@ export default function Moderation() {
 
   async function freshData() {
     setFetching(true);
-    const res = await fetch('/api/fetchAnalysis',
+    const res = await fetch(
+        `${BASE_URL}/api/browseAllReviewedPaper`,
         {
           headers: noCacheHeader
-        })
+        }
+    )
+
     setFetching(false);
 
     if (!res.ok) {
@@ -108,9 +111,9 @@ export default function Moderation() {
       throw new Error('Failed to fetch data')
     }
 
-    let response = await res.json();
+    const data = await res.json()
 
-    setWaitingList(response.data);
+    setWaitingList(data);
   }
 
   useEffect(() => {
@@ -130,7 +133,18 @@ export default function Moderation() {
 
     console.log(param)
     setModalSubmitPending(true);
-    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(param), headers: noCacheHeader})
+
+    let headers = new Headers(noCacheHeader);
+    headers.append("Content-Type", "application/json");
+
+    const res = await fetch(
+        `${BASE_URL}/api/AnalysePaper`,
+        {
+          method: 'post',
+          body: JSON.stringify(param),
+          headers: headers
+        }
+    )
 
     if (!res.ok) {
       setModalSubmitPending(false);
@@ -142,14 +156,10 @@ export default function Moderation() {
 
     const response = await res.json();
 
-    if (response.code === 0) {
-      console.log(response);
-      setIsModalOpen(false);
-      freshData();
-      message.success('Success');
-    } else {
-      message.error(response.msg ?? 'error');
-    }
+    console.log(response);
+    setIsModalOpen(false);
+    freshData();
+    message.success('Success');
   }
 
   const columns = [
