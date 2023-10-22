@@ -9,7 +9,7 @@ const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export type NewArticle = {
   doi?: string;
-  authors?: string[];
+  authors?: string;
   jName?: string;
   number?: string;
   pages?: string;

@@ -8,10 +8,14 @@ import {NewArticle} from "@/app/submitNew/page";
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
 export default function Moderation() {
+  const [fetching, setFetching] = useState(false);
+
   const [waitingList, setWaitingList] = useState<({id: string;}&NewArticle)[]>([]);
 
   async function freshData() {
+    setFetching(true);
     const res = await fetch('/api/fetchModeration')
+    setFetching(false);
 
     if (!res.ok) {
       message.error('Failed to fetch data');
@@ -45,6 +49,7 @@ export default function Moderation() {
       children:
           <Table
               dataSource={waitingList}
+              loading={fetching}
               columns={[
                 ...columns,
                 {
@@ -52,7 +57,7 @@ export default function Moderation() {
                   dataIndex: 'action',
                   key: 'action',
                   render: (text, record) => (
-                      <RowAction id={record.id} onSuccess={freshData} />
+                      <RowAction record={record} onSuccess={freshData} />
                   )
                 },
               ]}
@@ -89,13 +94,19 @@ export default function Moderation() {
   )
 }
 
-function RowAction({id, onSuccess}:{id:string, onSuccess: Function}) {
+function RowAction({record, onSuccess}:{record:{id:string}&NewArticle, onSuccess: Function}) {
   const [pending, setPending] = useState(false);
 
-  async function moderate(opinion: 1 | 2) {
+  async function moderate(opinion: 0 | 1) {
     console.log(opinion);
     setPending(true);
-    const res = await fetch(`/api/moderate?id=${id}&opinion=${opinion}`,)
+    const res = await fetch(`/api/moderate`, {
+      method: 'post',
+      body: JSON.stringify({
+        ...record,
+        opinion,
+      })
+    })
 
     if (!res.ok) {
       setPending(false);
@@ -132,7 +143,7 @@ function RowAction({id, onSuccess}:{id:string, onSuccess: Function}) {
             description="Are you sure to reject this submission?"
             okText="Yes"
             cancelText="No"
-            onConfirm={() => moderate(2)}
+            onConfirm={() => moderate(0)}
         >
           <Button loading={pending} danger>Reject</Button>
         </Popconfirm>

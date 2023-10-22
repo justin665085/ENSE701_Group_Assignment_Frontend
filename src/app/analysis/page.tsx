@@ -9,77 +9,80 @@ import {
   Modal,
   Form,
   Input,
-  Select, message, FormInstance,
+  Select, message, FormInstance, DatePicker,
 } from "antd";
 import {useEffect, useRef, useState} from "react";
 import {NewArticle} from "@/app/submitNew/page";
+import dayjs, {Dayjs} from "dayjs";
 
 const notoSerif = Noto_Serif({subsets: ['latin']})
 
 const FORM_FIELDS = [
   {label: 'Title', name: 'title'},
   {
-    label: 'Authors', name: 'authors', jsx: (
-        <Select
-            open={false}
-            suffixIcon={<></>}
-            mode="tags"
-            showSearch={false}
-            style={{cursor: 'text'}}
-            tokenSeparators={[',']}
-            placeholder='Input Authors (Use comma or Enter for name separation)'
-        />
-    )
+    label: 'Authors', name: 'authors',
+    // jsx: (
+    //     <Select
+    //         open={false}
+    //         suffixIcon={<></>}
+    //         mode="tags"
+    //         showSearch={false}
+    //         style={{cursor: 'text'}}
+    //         tokenSeparators={[',']}
+    //         placeholder='Input Authors (Use comma or Enter for name separation)'
+    //     />
+    // )
   },
+  {label: 'Year of Public', name: 'yop', jsx: <DatePicker size='large' picker="year"/>},
   {label: 'Journal Name', name: 'jName'},
-  {label: 'SE Practice', name: 'sePractice'},
+  {label: 'SE Practice', name: 'SEpractice'},
   {label: 'Claim', name: 'claim', jsx: <Input.TextArea placeholder='Input Cliam' rows={4}/>},
   {label: 'Result of evidence', name: 'ROE'},
   {
     label: 'Type of research',
     name: 'TOR',
-    jsx: (
-        <Select
-            open={false}
-            suffixIcon={<></>}
-            mode="tags"
-            showSearch={false}
-            style={{cursor: 'text'}}
-            tokenSeparators={[',']}
-            placeholder='Input type of research (Use comma or Enter for item separation)'
-        />
-    )
+    // jsx: (
+    //     <Select
+    //         open={false}
+    //         suffixIcon={<></>}
+    //         mode="tags"
+    //         showSearch={false}
+    //         style={{cursor: 'text'}}
+    //         tokenSeparators={[',']}
+    //         placeholder='Input type of research (Use comma or Enter for item separation)'
+    //     />
+    // )
   },
   {
     label: 'Type of participant',
     name: 'TOP',
-    jsx: (
-        <Select
-            open={false}
-            suffixIcon={<></>}
-            mode="tags"
-            showSearch={false}
-            style={{cursor: 'text'}}
-            tokenSeparators={[',']}
-            placeholder='Input type of participant (Use comma or Enter for item separation)'
-        />
-    )
+    // jsx: (
+    //     <Select
+    //         open={false}
+    //         suffixIcon={<></>}
+    //         mode="tags"
+    //         showSearch={false}
+    //         style={{cursor: 'text'}}
+    //         tokenSeparators={[',']}
+    //         placeholder='Input type of participant (Use comma or Enter for item separation)'
+    //     />
+    // )
   },
   {label: 'DOI', name: 'doi'},
 ]
 
 export type AnalyseRecord = {
   id: string,
-  authors?: string[];
+  authors?: string;
   jName?: string;
   title?: string;
-  yop?: string;
+  yop?: Dayjs;
   sePractice?: string;
   claim?: string;
   ROE?: string;
-  TOR?: string[];
-  TOP?: string[];
-  DOI?: string[];
+  TOR?: string;
+  TOP?: string;
+  DOI?: string;
 }
 
 export default function Moderation() {
@@ -88,8 +91,12 @@ export default function Moderation() {
   const [modalInitialValue, setModalInitialValue] = useState<AnalyseRecord>({id: '-1'});
   const [modalSubmitPending, setModalSubmitPending] = useState(false);
 
+  const [fetching, setFetching] = useState(false);
+
   async function freshData() {
+    setFetching(true);
     const res = await fetch('/api/fetchAnalysis')
+    setFetching(false);
 
     if (!res.ok) {
       setModalSubmitPending(false);
@@ -111,9 +118,15 @@ export default function Moderation() {
   async function handleModalSubmit() {
     if(modalForm.current === null) return;
     const formValue: AnalyseRecord = modalForm.current.getFieldsValue()
-    console.log(formValue)
+
+    let param = {
+      ...formValue,
+      yop: formValue.yop?.year()
+    }
+
+    console.log(param)
     setModalSubmitPending(true);
-    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(formValue)})
+    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(param)})
 
     if (!res.ok) {
       setModalSubmitPending(false);
@@ -153,6 +166,7 @@ export default function Moderation() {
       children:
           <Table
               dataSource={waitingList}
+              loading={fetching}
               columns={[
                 ...columns,
                 {
@@ -162,7 +176,10 @@ export default function Moderation() {
                   render: (text, record) => (
                       <Button type="primary" onClick={() => {
                         setIsModalOpen(true);
-                        setModalInitialValue(record);
+                        setModalInitialValue({
+                          ...record,
+                          yop: dayjs().year(+(record.yop??0))
+                        });
                       }} ghost>Analyse</Button>
                   )
                 },

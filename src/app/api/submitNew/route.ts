@@ -1,11 +1,16 @@
+import {BASE_URL} from "@/common/const";
+
 export async function POST(request: Request) {
   const body = await request.json()
+  let headers = new Headers();
+  headers.append("Content-Type", "application/json");
 
   const res = await fetch(
-      'https://backend-aex1qbiui-justin665085.vercel.app/api/insertNewPaper',
+      `${BASE_URL}/api/insertNewPaper`,
       {
         method: 'post',
-        body: body,
+        body: JSON.stringify(body),
+        headers: headers
       }
   )
 

@@ -1,18 +1,23 @@
-import {NextRequest} from "next/server";
+import {BASE_URL} from "@/common/const";
 
-export async function GET(
-    request: NextRequest
-) {
-  // const res = await fetch('https://backend-aex1qbiui-justin665085.vercel.app/api/browseAllNewPaper', )
-  // const data = await res.text()
-  const searchParams = request.nextUrl.searchParams
-  const code = 0;
-  console.log(searchParams)
-  const data = {
-    id: searchParams.get('id'),
-    opinion: searchParams.get('opinion')
+export async function POST(request: Request) {
+  const body = await request.json()
+  let headers = new Headers();
+  headers.append("Content-Type", "application/json");
+
+  const res = await fetch(
+      `${BASE_URL}/api/reviewPaper`,
+      {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: headers
+      }
+  )
+
+  let code = 1;
+  if (res.ok) {
+    code = 0;
   }
-  await new Promise((res) => setTimeout(res, Math.random() * 1000 + 500));
 
-  return Response.json({code, data })
+  return Response.json({code})
 }
