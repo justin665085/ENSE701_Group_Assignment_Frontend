@@ -104,21 +104,14 @@ function RowAction({record, onSuccess}:{record:{id:string}&NewArticle, onSuccess
   async function moderate(opinion: 0 | 1) {
     console.log(opinion);
     setPending(true);
-
-    let headers = new Headers(noCacheHeader);
-    headers.append("Content-Type", "application/json");
-
-    const res = await fetch(
-        `${BASE_URL}/api/reviewPaper`,
-        {
-          method: 'post',
-          body: JSON.stringify({
-            ...record,
-            opinion,
-          }),
-          headers: headers
-        }
-    )
+    const res = await fetch(`/api/moderate`, {
+      method: 'post',
+      body: JSON.stringify({
+        ...record,
+        opinion,
+      }),
+      headers: noCacheHeader
+    })
 
     if (!res.ok) {
       setPending(false);
@@ -130,9 +123,13 @@ function RowAction({record, onSuccess}:{record:{id:string}&NewArticle, onSuccess
 
     const response = await res.json();
 
-    console.log(response);
-    onSuccess();
-    message.success('Success');
+    if (response.code === 0) {
+      console.log(response);
+      onSuccess();
+      message.success('Success');
+    } else {
+      message.error(response.msg ?? 'error');
+    }
   }
 
   return (

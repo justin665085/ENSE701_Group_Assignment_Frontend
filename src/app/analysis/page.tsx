@@ -133,18 +133,7 @@ export default function Moderation() {
 
     console.log(param)
     setModalSubmitPending(true);
-
-    let headers = new Headers(noCacheHeader);
-    headers.append("Content-Type", "application/json");
-
-    const res = await fetch(
-        `${BASE_URL}/api/AnalysePaper`,
-        {
-          method: 'post',
-          body: JSON.stringify(param),
-          headers: headers
-        }
-    )
+    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(param), headers: noCacheHeader})
 
     if (!res.ok) {
       setModalSubmitPending(false);
@@ -156,10 +145,14 @@ export default function Moderation() {
 
     const response = await res.json();
 
-    console.log(response);
-    setIsModalOpen(false);
-    freshData();
-    message.success('Success');
+    if (response.code === 0) {
+      console.log(response);
+      setIsModalOpen(false);
+      freshData();
+      message.success('Success');
+    } else {
+      message.error(response.msg ?? 'error');
+    }
   }
 
   const columns = [
