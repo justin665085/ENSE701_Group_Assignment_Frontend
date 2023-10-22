@@ -9,7 +9,7 @@ import {
   Modal,
   Form,
   Input,
-  Select, message, FormInstance, DatePicker,
+  Select, message, FormInstance, DatePicker, Popconfirm,
 } from "antd";
 import {useEffect, useRef, useState} from "react";
 import {NewArticle} from "@/app/submitNew/page";
@@ -123,7 +123,8 @@ export default function Moderation() {
   const modalForm = useRef<FormInstance>(null);
 
   async function handleModalSubmit() {
-    if(modalForm.current === null) return;
+    if (modalForm.current === null) return;
+
     const formValue: AnalyseRecord = modalForm.current.getFieldsValue()
 
     let param = {
@@ -148,6 +149,27 @@ export default function Moderation() {
     if (response.code === 0) {
       console.log(response);
       setIsModalOpen(false);
+      freshData();
+      message.success('Success');
+    } else {
+      message.error(response.msg ?? 'error');
+    }
+  }
+
+  async function handleDecline(title: string) {
+    let param = {title, decline: true};
+
+    const res = await fetch(`/api/analyse`, {method: 'post', body: JSON.stringify(param), headers: noCacheHeader})
+
+    if (!res.ok) {
+      setModalSubmitPending(false);
+      message.error('Failed to submit');
+      throw new Error('Failed to submit')
+    }
+
+    const response = await res.json();
+
+    if (response.code === 0) {
       freshData();
       message.success('Success');
     } else {
@@ -181,13 +203,24 @@ export default function Moderation() {
                   dataIndex: 'action',
                   key: 'action',
                   render: (text, record) => (
-                      <Button type="primary" onClick={() => {
-                        setIsModalOpen(true);
-                        setModalInitialValue({
-                          ...record,
-                          yop: dayjs().year(+(record.yop??0))
-                        });
-                      }} ghost>Analyse</Button>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <Button type="primary" onClick={() => {
+                          setIsModalOpen(true);
+                          setModalInitialValue({
+                            ...record,
+                            yop: dayjs().year(+(record.yop ?? 0))
+                          });
+                        }} ghost>Analyse</Button>
+                        <Popconfirm
+                            title="Decline this submission"
+                            description="Are you sure to decline this submission?"
+                            okText="Yes"
+                            cancelText="No"
+                            onConfirm={() => handleDecline(record.title ?? '')}
+                        >
+                          <Button danger>Decline</Button>
+                        </Popconfirm>
+                      </div>
                   )
                 },
               ]}
